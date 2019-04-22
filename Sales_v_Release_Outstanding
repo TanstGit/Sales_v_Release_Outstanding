@@ -1,0 +1,32 @@
+-- The point of this query is to show open releases
+-- This query also includeds orders on hold and orders Scheduled and orders staged
+
+select top (100)
+
+a.PCN,                             -- Company
+a.Release_key,                     -- Identifer of Release
+a.Ship_To,                         -- Location Pproduct will be shipped to
+b.release_status,                  -- Status of Release (Canceled, Open, Hold, Closed, Staged, Scheduled)
+c.Release_Source,                  -- How release entered system
+d.Release_Type,                    -- Type of order Ship Schedule, Forcast ?
+a.Ship_Date,                       -- Date that Product ships
+a.Due_Date,                        -- Date that it is due to the customer??
+a.Preliminary_Due_Date,            -- Planned date??
+a.Note,                            -- Sales scribbles 
+a.Quantity_shipped                 -- Quantity already shipped
+
+
+from Sales_v_release as a
+Join sales_V_release_status as b                              --This link allows translation for Release_status_key into a readable value
+  on b.Release_status_key = a.Release_status_key              
+Join Sales_v_Release_Source as c                              --This link allows translation for Release_source_key into a readable value
+  on c.Release_Source_Key = a.Release_Source_key
+Join Sales_v_Release_Type as d
+  on d.Release_Type_Key = a.Release_Type_key
+--Sales_v_Release_Type--Release_Type_Key  
+  
+  
+where a.Fully_shipped = 'False'                               -- Not already shipped
+and b.Release_Status_Key <> '3018'                            -- Closed
+and b.Release_Status_Key <> '3015'                            -- Canceled
+order by quantity_shipped DESC                                -- Order by largest quantity first these are partial shipments
